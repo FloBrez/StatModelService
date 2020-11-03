@@ -1,42 +1,40 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  modelScoring
-
-  Sample SAM Template for experimentService
-
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
-Globals:
-  Function:
-    Timeout: 300
+  A service to fit statistical models using 
+  python package statsmodel and R formula
+  model specification
 
 Resources:
   predict:
+    FunctionName: statsmodels-predict
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: statsmodels/
-      Handler: score.lambda_handler
+      Handler: predict.lambda_handler
       MemorySize: 256
+      Timeout: 300
       Role: arn:aws:iam::402476661663:role/WildRydesLambda
       Runtime: python3.8
+      Environment:
+        Variables:
+          statsmodelsBucket: !Ref statsmodelservicebucket
+          statsmodelsKeyTemplate: statsmodels/{id}-{version}.pickle
   fit:
+    FunctionName: statsmodels-fit
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: statsmodels/
-      Handler: score.lambda_handler
-      MemorySize: 256
+      Handler: fit.lambda_handler
+      MemorySize: 1024
+      Timeout: 900
       Role: arn:aws:iam::402476661663:role/WildRydesLambda
       Runtime: python3.8
-  statsmodels:
-    Type: AWS::DynamoDB::Table
-    Properties: 
-      AttributeDefinitions: 
-        - AttributeName: id
-          AttributeType: S
-      KeySchema: 
-        - AttributeName: id
-          KeyType: HASH
-      ProvisionedThroughput: 
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
+      Environment:
+        Variables:
+          statsmodelsBucket: !Ref statsmodelservicebucket
+          statsmodelsKeyTemplate: statsmodels/{id}-{version}.pickle
+
+  statsmodelservicebucket:
+    Type: AWS::S3::Bucket
 

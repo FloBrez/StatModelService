@@ -1,0 +1,8 @@
+{
+    "modelId": "test-rct",
+    "modelVersion": "c9ee9789-af56-4669-a368-232874de90b5",
+    "data": {
+        "Treatment": "A", 
+        "Literacy": 65
+    }
+}

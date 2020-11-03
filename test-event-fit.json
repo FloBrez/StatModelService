@@ -1,0 +1,14 @@
+{
+	"modelId": "test",
+	"formula": "Pop1831 ~ Literacy + Region",
+	"data": [
+		{"Region": "E", "Literacy": 55,  "Pop1831": 344.21}, 
+		{"Region": "W", "Literacy": 35,  "Pop1831": 111.21}, 
+		{"Region": "S", "Literacy": 105, "Pop1831": 89.21},
+		{"Region": "C", "Literacy": 105, "Pop1831": 33.21},
+		{"Region": "W", "Literacy": 45,  "Pop1831": 121.21}, 
+		{"Region": "S", "Literacy": 85,  "Pop1831": 45.31},
+		{"Region": "C", "Literacy": 15,  "Pop1831": 10.21},
+		{"Region": "N", "Literacy": 33,  "Pop1831": 78.21}
+	]
+}

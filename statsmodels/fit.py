@@ -1,53 +1,53 @@
-import statsmodels.api as sm
-import statsmodels.formula.api as smf
-import pandas as pd
+from statsmodels.formula.api import ols
 import boto3
 import tempfile
 import json
-BUCKET    = 'code-janos'
-MODEL_KEY = 'models/fitted_model.pickle'
+import os
+import uuid
+from pandas import DataFrame
 
-# Input
-data = [
-    {'Region': 'E', 'Literacy': 55,  'Pop1831': 344.21}, 
-    {'Region': 'W', 'Literacy': 35,  'Pop1831': 111.21}, 
-    {'Region': 'S', 'Literacy': 105, 'Pop1831': 89.21},
-    {'Region': 'C', 'Literacy': 105, 'Pop1831': 33.21},
-    {'Region': 'W', 'Literacy': 45,  'Pop1831': 121.21}, 
-    {'Region': 'S', 'Literacy': 85,  'Pop1831': 45.31},
-    {'Region': 'C', 'Literacy': 15, 'Pop1831':  10.21},
-    {'Region': 'N', 'Literacy': 33,  'Pop1831': 78.21}
-]
-formula = 'Pop1831 ~ Literacy + Region'
+bucket = os.environ['statsmodelsBucket']
+key_template = os.environ['statsmodelsKeyTemplate']
+s3 = boto3.resource('s3')
 
-# Data Preparation
-df = pd.DataFrame(data)
+def lambda_handler(event, context):
+    # fit model
+    df = DataFrame(event.get('data'))
+    model_fitted = ols(event.get('formula'), data=df).fit()
+    print(model_fitted.summary())
 
-# Model Fit
-model_fitted  = smf.ols(formula, data=df).fit()
-model_fitted.summary().as_csv()
-print(model_fitted.summary())
-model_fitted.save('fitted_model.pickle', remove_data=True)
-model_fitted.rsquared
-# Save Data
-s3  = boto3.resource('s3')
-tmp = '/tmp/123.pickle'
-s3.Bucket(BUCKET).download_file(MODEL_KEY, tmp)
-MODEL_FITTED = sm.load(tmp)
+    # save model (locally)
+    version = str(uuid.uuid4())
+    tmp = '/tmp/{id}-{version}.pickle'.format(id=event.get('modelId'), version=version)
+    model_fitted.save(tmp, remove_data=True)
 
-x = pd.DataFrame(data={
-    'estimate': model_fitted.params,
-    'se': model_fitted.bse,
-    't': model_fitted.tvalues,
-    'p': model_fitted.pvalues
-})
+    # upload to S3
+    key = key_template.format(id=event.get('modelId'), version=version)
+    s3.Bucket(bucket).upload_file(tmp, key)
 
-x.to_dict(orient='index')
+    # return model information
+    df_parameters = DataFrame(
+        data={
+        'estimate': model_fitted.params,
+        'se': model_fitted.bse,
+        't': model_fitted.tvalues,
+        'p': model_fitted.pvalues
+    })
 
-model_fitted.conf_int()
-model_fitted.summary().as_text()
-model_fitted.summary().as_html()
+    parameters = df_parameters.to_dict(orient='index')
 
+    #model_fitted.conf_int()
+    #model_fitted.summary().as_text()
+    #model_fitted.summary().as_html()
+
+    result = {
+        'modelId': event.get('modelId'),
+        'modelVersion': version,
+        's3bucket': bucket,
+        's3key': key,
+        'parameters': parameters
+    }
+    return json.dumps(result)
 
 
 

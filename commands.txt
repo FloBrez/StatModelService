@@ -1,0 +1,6 @@
+sam build
+
+sam local invoke "fit" -e test-event-fit.json
+
+sam local invoke "predict" -e test-event-predict.json
+

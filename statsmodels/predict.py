@@ -2,16 +2,24 @@ import statsmodels.api as sm
 import boto3
 import tempfile
 import json
-BUCKET    = 'code-janos'
-MODEL_KEY = 'models/fitted_model.pickle'
+import os
 
+bucket = os.environ['statsmodelsBucket']
+key_template = os.environ['statsmodelsKeyTemplate']
 s3  = boto3.resource('s3')
-tmp = '/tmp/123.pickle'
-s3.Bucket(BUCKET).download_file(MODEL_KEY, tmp)
-MODEL_FITTED = sm.load(tmp)
 
 def lambda_handler(event, context):
-    new_data   = event # {'Region': 'E', 'Literacy': 65}
-    prediction = MODEL_FITTED.predict(exog=new_data)
-    result     = {'prediction': prediction[0]}
+    # load fitted model
+    key = key_template.format(id=event.get('modelId'), version=str(event.get('modelVersion')))
+    tmp = '/tmp/{id}-{version}.pickle'.format(id=event.get('modelId'), version=str(event.get('modelVersion')))
+    s3.Bucket(bucket).download_file(key, tmp)
+    model_fitted = sm.load(tmp)
+    # make prediction
+    new_data   = event.get('data')
+    prediction = model_fitted.predict(exog=new_data)
+    result     = {
+        'modelId': event.get('modelId'),
+        'modelVersion': event.get('modelVersion'),
+        'prediction': prediction[0]
+    }
     return json.dumps(result)
