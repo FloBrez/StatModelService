@@ -20,6 +20,13 @@ Resources:
         Variables:
           statsmodelsBucket: !Ref statsmodelservicebucket
           statsmodelsKeyTemplate: statsmodels/{id}-{version}.pickle
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /predict
+            Method: post
+            RestApiId: !Ref Api
   fit:
     FunctionName: statsmodels-fit
     Type: AWS::Serverless::Function
@@ -34,7 +41,143 @@ Resources:
         Variables:
           statsmodelsBucket: !Ref statsmodelservicebucket
           statsmodelsKeyTemplate: statsmodels/{id}-{version}.pickle
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /fit
+            Method: post
+            RestApiId: !Ref Api
 
   statsmodelservicebucket:
     Type: AWS::S3::Bucket
 
+  Api:
+    Type: "AWS::Serverless::Api"
+    Properties:
+      StageName: Prod
+      DefinitionBody:
+        openapi: "3.0.1"
+        info:
+          title: "statsmodelServiceApi"
+          description: "REST API for statsmodelService application"
+          version: "2020-11-03T11:58:21Z"
+        servers:
+        - url: "https://0etv52i88l.execute-api.eu-central-1.amazonaws.com/{basePath}"
+          variables:
+            basePath:
+              default: "/prod"
+        paths:
+          /fit:
+            post:
+              responses:
+                200:
+                  description: "200 response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      schema:
+                        type: "string"
+                  content:
+                    application/json:
+                      schema:
+                        $ref: "#/components/schemas/Empty"
+              x-amazon-apigateway-integration:
+                uri: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Function.Arn}/invocations"
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                passthroughBehavior: "when_no_match"
+                httpMethod: "POST"
+                contentHandling: "CONVERT_TO_TEXT"
+                type: "aws"
+            options:
+              responses:
+                200:
+                  description: "200 response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Methods:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Headers:
+                      schema:
+                        type: "string"
+                  content:
+                    application/json:
+                      schema:
+                        $ref: "#/components/schemas/Empty"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Methods: "'OPTIONS,POST'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                requestTemplates:
+                  application/json: "{\"statusCode\": 200}"
+                passthroughBehavior: "when_no_match"
+                type: "mock"
+          /predict:
+            post:
+              responses:
+                200:
+                  description: "200 response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      schema:
+                        type: "string"
+                  content:
+                    application/json:
+                      schema:
+                        $ref: "#/components/schemas/Empty"
+              x-amazon-apigateway-integration:
+                uri: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${Function.Arn}/invocations"
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                passthroughBehavior: "when_no_match"
+                httpMethod: "POST"
+                contentHandling: "CONVERT_TO_TEXT"
+                type: "aws"
+            options:
+              responses:
+                200:
+                  description: "200 response"
+                  headers:
+                    Access-Control-Allow-Origin:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Methods:
+                      schema:
+                        type: "string"
+                    Access-Control-Allow-Headers:
+                      schema:
+                        type: "string"
+                  content:
+                    application/json:
+                      schema:
+                        $ref: "#/components/schemas/Empty"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Methods: "'OPTIONS,POST'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                requestTemplates:
+                  application/json: "{\"statusCode\": 200}"
+                passthroughBehavior: "when_no_match"
+                type: "mock"
+        components:
+          schemas:
+            Empty:
+              title: "Empty Schema"
+              type: "object"
