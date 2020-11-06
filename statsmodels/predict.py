@@ -1,25 +1,33 @@
 import statsmodels.api as sm
 import boto3
-import tempfile
 import json
 import os
 
-bucket = os.environ['statsmodelsBucket']
-key_template = os.environ['statsmodelsKeyTemplate']
+bucket = os.environ['bucket']
+key_template = os.environ['keyTemplate']
 s3  = boto3.resource('s3')
 
-def lambda_handler(event, context):
-    # load fitted model
-    key = key_template.format(id=event.get('modelId'), version=str(event.get('modelVersion')))
-    tmp = '/tmp/{id}-{version}.pickle'.format(id=event.get('modelId'), version=str(event.get('modelVersion')))
+def get_model(model_id):
+    key = key_template.format(id=model_id)
+    tmp = '/tmp/{id}.pickle'.format(id=model_id)
     s3.Bucket(bucket).download_file(key, tmp)
-    model_fitted = sm.load(tmp)
-    # make prediction
-    new_data   = event.get('data')
-    prediction = model_fitted.predict(exog=new_data)
-    result     = {
-        'modelId': event.get('modelId'),
-        'modelVersion': event.get('modelVersion'),
-        'prediction': prediction[0]
+    model = sm.load(tmp)
+    return model
+
+def predict_from_model(model, data):
+    prediction = model.predict(exog=data)
+    return prediction[0]
+
+def lambda_handler(event, context):
+    payload = json.loads(event['body'])
+    model   = get_model(payload['modelId'])
+    prediction = predict_from_model(model=model, data=payload['data'])
+
+    result = {
+        'prediction': prediction
     }
-    return json.dumps(result)
+
+    return {
+        'statusCode': 200,
+        'body': json.dumps(result)
+    }

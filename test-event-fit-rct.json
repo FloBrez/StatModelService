@@ -1,5 +1,4 @@
 {
-	"modelId": "test-rct",
 	"formula": "Outcome ~ Treatment",
 	"data": [
 		{"Treatment": "A", "Outcome": 110}, 
