@@ -13,7 +13,33 @@ Resources:
       Handler: predict.lambda_handler
       MemorySize: 256
       Timeout: 300
-      Role: arn:aws:iam::402476661663:role/WildRydesLambda
+      Policies:
+      - AWSLambdaExecute
+      - Version: '2012-10-17' 
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:ListBucket",
+              "s3:GetBucketLocation",
+              "s3:GetObjectVersion",
+              "s3:GetLifecycleConfiguration"
+            ],
+            "Resource": [
+              {
+                "Fn::Sub": [
+                  "arn:${AWS::Partition}:s3:::${bucketName}",
+                  {
+                    "bucketName": {
+                      "Ref": "models"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       Runtime: python3.8
       Environment:
         Variables:
@@ -32,7 +58,31 @@ Resources:
       Handler: fit.lambda_handler
       MemorySize: 1024
       Timeout: 900
-      Role: arn:aws:iam::402476661663:role/WildRydesLambda
+      Policies:
+      - AWSLambdaExecute
+      - Version: '2012-10-17' 
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:PutObject",
+              "s3:PutObjectAcl",
+              "s3:PutLifecycleConfiguration"
+            ],
+            "Resource": [
+              {
+                "Fn::Sub": [
+                  "arn:${AWS::Partition}:s3:::${bucketName}",
+                  {
+                    "bucketName": {
+                      "Ref": "models"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       Runtime: python3.8
       Environment:
         Variables:

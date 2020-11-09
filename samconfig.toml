@@ -1,7 +1,7 @@
-version=0.1
+version=0.2
 [default.deploy.parameters]
-stack_name = "statsmodelService"
+stack_name = "StatModelService"
 region = "eu-central-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-tags = "project=\"statsmodelService\" stage=\"production\""
+tags = "project=\"StatModelService\" stage=\"production\""
