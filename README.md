@@ -6,8 +6,6 @@ StatModelService uses AWS Lambda with Python 3.8 runtime to fit statistical mode
 ![Architecture](/StatModelServiceArchitecture.png)
 
 
-TODO: elaborate on goal, high-level design
-
 ## Installation
 You can install StatModelService in your AWS account using [AWS serverless application model (SAM)](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html). All resources are defined in `template.yaml` and deployment information is defined in `samconfig.toml`. In the latter, make sure to adjust the `region` parameter (default is `eu-central-1`) and add/delete custom `tags` for the deployment.
 
@@ -82,4 +80,4 @@ The response (body) just contains the predicted value
 ```
 
 ## FAQ
-TODO:
+N/A
