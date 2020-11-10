@@ -9,7 +9,7 @@ Resources:
   predict:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: statsmodels/
+      CodeUri: StatModelService/
       Handler: predict.lambda_handler
       MemorySize: 256
       Timeout: 300
@@ -54,7 +54,7 @@ Resources:
   fit:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: statsmodels/
+      CodeUri: StatModelService/
       Handler: fit.lambda_handler
       MemorySize: 1024
       Timeout: 900
@@ -99,8 +99,25 @@ Resources:
     Type: AWS::S3::Bucket
 
 Outputs:
-  statsmodelservicebucket:
-    Description: bucket containing fitted models and model metadata
-    Value: Value to return
-  
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  StatModelServiceS3Bucket:
+    Description: "bucket containing fitted models and model metadata"
+    Value: !Ref models
+  StatModelServiceApi:
+    Description: "API Gateway endpoint URL for Prod stage for StatModelService"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+  StatModelFitLambda:
+    Description: "Fit Lambda Function ARN"
+    Value: !GetAtt fit.Arn
+  StatModelPredictLambda:
+    Description: "Predict Lambda Function ARN"
+    Value: !GetAtt predict.Arn
+  StatModelFitIamRole:
+    Description: "Implicit IAM Role created for StatModelFitLambda function"
+    Value: !GetAtt fitRole.Arn
+  StatModelFPredictIamRole:
+    Description: "Implicit IAM Role created for StatModelPredictLambda function"
+    Value: !GetAtt predictRole.Arn
 

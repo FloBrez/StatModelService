@@ -4,4 +4,4 @@ stack_name = "StatModelService"
 region = "eu-central-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
-tags = "project=\"StatModelService\" stage=\"production\""
+tags = "project=\"StatModelService\" stage=\"prod\""
