@@ -21,7 +21,9 @@ sam deploy --guided
 ```
 
 ## Usage
-As the service is accessible via web API, you can define and fit/train models using any client and programming language that can send HTTP requests. Since the implementation is serverless, you do not have to maintain servers and the service scales easily and cost-effectively.  
+As the service is accessible via web API, you can define and fit/train models using any client and programming language that can send HTTP requests. Since the implementation is serverless, you do not have to maintain servers and the service scales easily and cost-effectively. 
+
+For the example below, you can use [this Postman collection](https://www.postman.com/collections/f2d98ee0e2cf6d042320). Make sure to use an environment that sets the `api_key` and `region` variables to the values of your deployment.
 
 ### Example
 To define and fit/train a statistical model, you send a POST request to your API's `/fit` path. The payload consists of the model formula (in R notation) and the data (in JSON format). To evaluate a simple A/B test with numerical outcome you would send data like this:
